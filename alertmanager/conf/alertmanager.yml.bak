@@ -1,0 +1,59 @@
+global:
+  resolve_timeout: 5m                     # 超时时间 
+  smtp_smarthost: 'smtp.163.com:25'       # smtp 地址及端口
+  smtp_from: 'xxxxxxxxx@163.com'          # 发件人邮箱账号
+  smtp_auth_username: 'xxxxxxxxx@163.com' # 发件人邮箱账号
+  smtp_auth_password: 'xxxxxxxx'          # 邮箱对应授权码
+  smtp_require_tls: false                 # 是否tls传输
+
+
+route:                         # 根路由
+  receiver: 'default-webhook'  # 顶级路由配置接收者 (匹配不到子集路由，会使用根路由发送报警)
+  group_by: ['alertname']      # 分组规则,如果满足 group_by 包含的标签，则这些报警会合并为一个通知发送给 receiver
+  group_wait: 30s              # 设置等待时间,在此等待时间内如果接收到多个报警,则会合并成一个通知发送给 receiver
+  group_interval: 5m           # 两次报警通知时间间隔,如: 5m, 表示发送报警通知后，如果5分钟内再次接收到报警则不会发送通知
+  repeat_interval: 4h          # 发送相同告警的时间间隔,如 4h,表示4小时内不会发送相同的报警
+
+  # 子路由的接受者,这里设置两个接受者
+  routes:
+  - receivers: 'email'         # 定义接收者名字 email， 与下面定义的名字相对应
+    group_wait: 10s
+    continue: false            # 默认为 false:  配置到满足条件的子节点点后直接返回， true: 匹配到子节点后还会继续变量后续子节点
+    match_re:                  # 正则匹配，验证当前标签 service 的值是否满足当前正则的条件
+      service: mysql|cassandra
+
+  - receivers: 'dingding'      # 定义接收者名字 dingding， 与下面定义的名字相对应
+    group_by: [product, environment]
+    group_wait: 10s
+    continue: false            # 默认为 false:  配置到满足条件的子节点点后直接返回， true: 匹配到子节点后还会继续变量后续子节点
+    match:                     # 字符串匹配，匹配当前标签 team 的值为 web 的报警
+      team: web            
+
+
+
+
+# 定义所有接受者
+receivers:
+- name: 'email'                # 接受者名称
+  email_configs:               # 接受者为 webhook 类型
+  - to: 'tototo@163.com'       # webhook 接收地址
+    send_resolved: true
+
+- name: 'dingding'
+  webhook_configs:
+  - url: 'http://dingtalk:8060/dingtalk/webhook/send'
+    send_resolved: true
+
+- name: 'default-webhook'             # 接受者名称
+  webhook_configs:             # 接受者为 webhook 类型
+  - url: 'http://127.0.0.1:5001/?resv=web' # webhook 接收地址
+
+
+
+# 抑制规则配置，当存在与另一个匹配的报警时，抑制规则将禁用用于有匹配的警报。
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'dev', 'instance']

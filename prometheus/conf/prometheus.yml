@@ -1,0 +1,134 @@
+# 全局配置
+global:
+  scrape_interval:     15s # 采集时间
+  evaluation_interval: 15s # 告警规则计算周期
+  scrape_timeout: 10s      # 采集超时时间
+  #evaluation_interval: 60s # 告警规则计算周期，默认为1分钟计算一次
+
+# 告警配置
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ["alertmanager:9093"]
+
+# 报警规则文件，可多个，并且可以使用通配符*
+rule_files:
+  - "/prometheus/rules/*.yml"
+
+# 采集 JOB 配置 
+scrape_configs:
+
+  # 本地
+  - job_name: 'prometheus'
+    # metrics_path defaults to '/metrics'
+    static_configs:
+    - targets: ['localhost:9090']
+
+
+  # 系统相关
+  - job_name: "linux_base"
+    metrics_path: /metrics
+    basic_auth:
+      username: prometheus
+      password: Ye5zHuxUQANGj6Bczq
+    file_sd_configs:
+    - refresh_interval: 1m
+      files:
+      - config_exporter.json
+
+  # Redis 集群
+  #- job_name: 'redis_exporter_targets'
+  #  metrics_path: /scrape
+  #  file_sd_configs:
+  #  - refresh_interval: 1m
+  #    files:
+  #    - redis_exporter.json
+  #  relabel_configs:
+  #  - source_labels: [__address__]
+  #    target_label: __param_target
+  #  - source_labels: [__param_target]
+  #    target_label: instance
+  #  - target_label: __address__
+  #    replacement: 10.10.194.247:9121
+
+  # Redis 主机
+  - job_name: "redis_host"
+    file_sd_configs:
+    - refresh_interval: 1m
+      files:
+      - redis_host.json
+
+  # Nginx 监控
+  - job_name: 'nginx_host'
+    metrics_path: /metrics
+    file_sd_configs:
+    - refresh_interval: 1m
+      files:
+      - nginx_host.json
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*)\:9913'
+        target_label: __param_target
+        replacement: '$1'
+      - source_labels: [__param_target]
+        regex: '(.*)\:9913'
+        target_label: __address__
+        replacement: '$1'
+
+  # 服务相关
+  #- job_name: "service_base"
+  #  file_sd_configs:
+  #  - refresh_interval: 1m
+  #    files:
+  #    - config_exporter.json
+
+  # Grafana相关
+  #- job_name: "service_base"
+  #  file_sd_configs:
+  #  - refresh_interval: 1m
+  #    files:
+  #    - config_grafana.json
+
+   
+  # ICMP 协议相关
+  - job_name: "icmp_ping"
+    metrics_path: /probe
+    params:
+      module: [icmp]
+    file_sd_configs:
+    - refresh_interval: 10s
+      files:
+      - "/prometheus/blackbox/ping*.json"
+    relabel_configs:
+    - source_labels: [__address__]
+      regex: (.*)(:80)?
+      target_label: __param_target
+      replacement: ${1}
+    - source_labels: [__param_target]
+      target_label: instance
+    - source_labels: [__param_target]
+      regex: (.*)
+      target_label: ping
+      replacement: ${1}
+    - source_labels: []
+      regex: .*
+      target_label: __address__
+      replacement: 10.11.19.141:9115
+
+
+  # 网站状态码相:关
+  - job_name: "check-web-status"
+    metrics_path: /probe
+    params:
+      module: [http_2xx]  # Look for a HTTP 200 response.
+    file_sd_configs:
+    - refresh_interval: 1m
+      files:
+      - "/prometheus/blackbox/200*.json"
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 10.11.19.141:9115

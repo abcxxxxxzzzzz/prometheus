@@ -1,0 +1,73 @@
+groups:
+- name: Redis状态-监控告警       # 报警组名称
+  rules:                      # 报警组规则
+  - alert: Redis挂了
+    expr: redis_up  == 0 and redis_up{env="redis"}
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "Redis down (instance {{ $labels.instance }})"
+      description: "Redis 挂了啊，mmp\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: OutOfMemory
+    expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: warning
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "Out of memory (instance {{ $labels.instance }})"
+      description: "Redis is running out of memory (> 80%)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: 复制中断
+    expr: delta(redis_connected_slaves[1m]) < 0
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "复制中断 Replication broken (instance {{ $labels.instance }})"
+      description: "Redis instance lost a slave\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: TooManyConnections
+    expr: redis_connected_clients > 5500
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: warning
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "Too many connections (instance {{ $labels.instance }})"
+      description: "Redis instance has too many connections( >5500 )\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: NotEnoughConnections
+    expr: redis_connected_clients < 5
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: warning
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "Not enough connections (instance {{ $labels.instance }})"
+      description: "Redis instance should have more connections (> 5)\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: 拒绝的连接数
+    expr: increase(redis_rejected_connections_total[1m]) > 0
+    for: 5m
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "Rejected connections (instance {{ $labels.instance }})"
+      description: "Some connections to Redis has been rejected\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"
+  - alert: redis节点堵塞
+    expr: redis_memory_used_bytes < 1024
+    for: 3s
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "redis 集群节点 (instance {{ $labels.instance }}) 堵塞"
+      description: "redis 集群节点内存使用值为\n  VALUE = {{ $value }}\n  LABELS: {{ $labels }}"

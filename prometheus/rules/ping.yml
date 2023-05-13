@@ -1,0 +1,13 @@
+groups:
+- name: check_ping_status
+  rules:
+  - alert: "PING网络不可达"
+    expr: probe_success == 0 and probe_success{env="icmp"}
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: error
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 主机ping不通了！"
+      description: "{{$labels.mountpoint }} 非要逼我报警么{{$value}}%)"

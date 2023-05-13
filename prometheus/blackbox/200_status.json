@@ -1,0 +1,13 @@
+[
+    {
+        "targets": [
+            "http://701.com",
+            "https://9966.com",
+            "http://98.net"
+        ],
+        "labels": {
+            "group": "域名监控",
+            "env": "http"
+        }
+    }
+]

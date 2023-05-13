@@ -1,0 +1,9 @@
+[
+    {
+        "targets": ["10.11.19.140"],
+        "labels": {
+            "group": "PING监控",
+            "env": "icmp"
+        }
+    }
+]

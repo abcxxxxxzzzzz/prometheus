@@ -1,0 +1,116 @@
+groups:
+- name: 主机状态-监控告警       # 报警组名称
+  rules:                      # 报警组规则
+  - alert: 主机状态            # 告警名称，需唯一
+    expr: up == 0             # promQL 表达式
+    for: 15s                  # 满足 expr 条件表达式，并持续时间超过for规定时间触发报警
+    labels:
+      group: telegram                   
+      severity: "error"         # 严重级别，自定义报警状态标签
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.instance}}:服务器宕机"              # 发出的告警标题
+      description: "{{$labels.instance}}:服务器延时超过5分钟"  # 发出的告警内容
+
+  - alert: CPU使用情况
+    expr: 100-(avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) by(instance)* 100) > 70
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: "warning"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} CPU使用率过高！"
+      description: "{{$labels.mountpoint }} CPU使用大于70%(目前使用:{{$value}}%)"
+
+  - alert: 内存使用
+    expr: (1 - (node_memory_MemAvailable_bytes / (node_memory_MemTotal_bytes)))* 100 > 90
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 内存使用率过高！"
+      description: "{{$labels.mountpoint }} 内存使用大于90%(已使用:{{$value}}%)"
+
+  - alert: IO性能
+    #expr: 100-(avg(irate(node_disk_io_time_seconds_total[1m])) by(instance)* 100) < 60
+    expr: (avg(irate(node_disk_io_time_seconds_total[1m])) by(instance) * 100) > 80
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 流入磁盘IO使用率过高！"
+      description: "{{$labels.mountpoint }} 流入磁盘IO大于80%(目前使用:{{$value}})"
+
+  - alert: 网络
+    #expr: ((sum(rate (node_network_receive_bytes_total{device=~"eth0"}[1m]) / 100000) > 300
+    expr: sum by (instance) (irate(node_network_receive_bytes_total{device=~"eth0"}[1m]) / 100000) > 200
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 流入网络带宽过高！"
+      description: "{{$labels.mountpoint }}流入网络带宽持续2分钟高于150M. RX带宽使用率{{$value}}"
+ 
+  - alert: 网络
+   # expr: ((sum(rate (node_network_transmit_bytes_total{device=~"eth0"}[1m]) / 100000) > 300
+    expr: sum by (instance) (irate(node_network_transmit_bytes_total{device=~"eth0"}[1m]) / 100000) > 200
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 流出网络带宽过高！"
+      description: "{{$labels.mountpoint }}流出网络带宽持续2分钟高于150M. RX带宽使用率{{$value}}"
+
+  - alert: TCP会话
+    expr: node_netstat_Tcp_CurrEstab > 150000
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} TCP_ESTABLISHED过高！"
+      description: "{{$labels.mountpoint }} TCP_ESTABLISHED大于15000%(目前使用:{{$value}}%)"
+
+  - alert: 磁盘容量
+    expr: 100-(node_filesystem_free_bytes{fstype=~"ext4|xfs"}/node_filesystem_size_bytes {fstype=~"ext4|xfs"}*100) > 80
+    for: 15s
+    labels:
+      group: telegram                   
+      severity: "error"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "{{$labels.mountpoint}} 磁盘分区使用率过高！"
+      description: "{{$labels.mountpoint }} 磁盘分区使用大于80%(目前使用:{{$value}}%)"
+
+  - alert: NodeProcessBlockedHigh
+    expr: node_procs_blocked{job="node"} > 10
+    for: 1m
+    labels:
+      group: telegram                   
+      severity: "warning"
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "instance: {{ $labels.instance }} 当前被阻塞的任务的数量过多"
+      description: "Process 当前被阻塞的任务的数量超过 10个"
+      value: "{{ $value }}"
+
+  - alert: NodeTimeOffsetHigh
+    expr: abs(node_timex_offset_seconds{job="node"}) > 3 * 60
+    for: 1m
+    labels:
+      severity: info
+      instance: "{{ $labels.instance }}"
+    annotations:
+      summary: "instance: {{ $labels.instance }} 时间偏差过大"
+      description: "Time 节点的时间偏差超过 3m"
+      value: "{{ $value }}"
