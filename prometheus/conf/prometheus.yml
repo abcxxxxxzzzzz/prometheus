@@ -52,11 +52,11 @@ scrape_configs:
   #    replacement: 10.10.194.247:9121
 
   # Redis 主机
-  - job_name: "redis_host"
-    file_sd_configs:
-    - refresh_interval: 1m
-      files:
-      - redis_host.json
+  #- job_name: "redis_host"
+  #  file_sd_configs:
+  #  - refresh_interval: 1m
+  #    files:
+  #    - redis_host.json
 
   # Nginx 监控
   - job_name: 'nginx_host'

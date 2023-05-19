@@ -1,18 +1,4 @@
-\
-M
+h
+X
 {}:{alertname="å†…å­˜ä½¿ç”¨"}
-telegramwebhook*£ü¢—Á°`:
-¯İ¬ëï±Æõ£îı¢—Á°`]
-M
-{}:{alertname="OutOfMemory"}
-telegramwebhook*ôÅü¢İÛÆş2
-¾ƒèŠİ¯Í”Şô¦ş¢İÛÆş`
-Q
-"{}:{alertname="BlackboxSlowProbe"}
-telegramwebhook*œäü¢ìª':	ı·³½¤²ø¨BœÅş¢ìª'q
-b
-){}:{alertname="BlackboxProbeHttpFailure"}
-telegramwebhook*äü¢Ò±Ö<:ß€ÁãÂ†÷´ËºÔ÷êÍşÌJÅş¢Ò±Ö<e
-U
-%{}:{alertname="NotEnoughConnections"}
-telegramwebhook*õÅü¢¹ü‰‚2	º«®‚Ğ§–½cõ¦ş¢¹ü‰‚
+telegramwebhook*²Ğ›£ıÖ¦î:¯İ¬ëï±Æõğ­Óåª§¼¿È²±£ıÖ¦î

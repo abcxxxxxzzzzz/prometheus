@@ -59,11 +59,16 @@ services:
       - ./grafana:/data/grafana 
       - ./grafana/plugins:/var/lib/grafana/plugins
       - ./grafana/grafana.ini:/etc/grafana/grafana.ini
-#  botgoalng:
-#    container_name: botgoalng
-#    image: dark1123/botgoalng:latest
-#    #network_mode: host
-#    restart: always
-#    environment:
-#      - MY_BOTTOKEN=XXX:YYY
-#      - MY_CHATID=123456
+  botfastapi:
+    container_name: botfastapi
+    build: ./app
+    #network_mode: host
+    restart: always
+    expose:
+      - "5001"
+    environment:
+      TG_ID: -983123014
+      TG_TOKEN: "6063962494:AAEfbP6iq68jx-kzNquiPsg2gBsgsDp2oVc"
+    volumes:
+      - /etc/localtime:/etc/localtime
+      - ./app:/app

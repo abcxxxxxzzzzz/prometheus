@@ -30,15 +30,15 @@ route:                         # 根路由
 receivers:
 - name: 'email'                               # 接受者名称
   webhook_configs:                            # 接受者为 webhook 类型
-  - url: 'http://10.10.194.247:5001/?type=email&to=tototo@gmail.com'    # webhook 接收地址
+  - url: 'http://botfastapi:5001/?type=email'    # webhook 接收地址
 
 - name: 'dingding'                            # 接受者名称
   webhook_configs:                            # 接受者为 webhook 类型
-  - url: 'http://10.10.194.247:5001/?type=dingding&access_token=xxxxxxxxxxx' 
+  - url: 'http://botfastapi:5001/?type=dingding' 
 
 - name: 'telegram'                            # 接受者名称
   webhook_configs:                            # 接受者为 webhook 类型
-  - url: 'http://10.10.194.247:5001/?type=telegram&chat_id=-0000000&token=xxxxxxx'
+  - url: 'http://botfastapi:5001/?type=telegram'
 
 
 # 抑制规则配置，当存在与另一个匹配的报警时，抑制规则将禁用用于有匹配的警报。

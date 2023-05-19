@@ -1,9 +1,10 @@
 [
     {
         "targets": [
-            "http://701.com",
-            "https://9966.com",
-            "http://98.net"
+            "https://kjsadhfioopqweh.oss-cn-shenzhen.aliyuncs.com/index.html",
+            "http://alb-ftwa7b43o1opc50nky.cn-shanghai.alb.aliyuncs.com/v11/",
+            "http://alb-qkbux2j4564fo197vx.cn-shenzhen.alb.aliyuncs.com/v11/",
+            "https://img.thpitnx.cn/sejie/150X150F.gif"
         ],
         "labels": {
             "group": "域名监控",
